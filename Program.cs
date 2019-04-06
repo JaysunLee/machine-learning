@@ -18,10 +18,10 @@ namespace myApp
         // - Label is what you are predicting, and is only set when training
         public class TransactionData
         {
-            [LoadColumn(1)]
+            [LoadColumn(0)]
             public float Amount;
 
-            [LoadColumn(4)]
+            [LoadColumn(1)]
             public string Label;
         }
 
@@ -39,7 +39,7 @@ namespace myApp
 
             // If working in Visual Studio, make sure the 'Copy to Output Directory'
             // property of iris-data.txt is set to 'Copy always'
-            IDataView trainingDataView = mlContext.Data.LoadFromTextFile<TransactionData>(path: "TransactionHistory.csv", hasHeader: false, separatorChar: ',');
+            IDataView trainingDataView = mlContext.Data.LoadFromTextFile<TransactionData>(path: "TransactionHistoryParsed.csv", hasHeader: false, separatorChar: ',');
 
             // STEP 3: Transform your data and add a learner
             // Assign numeric values to text in the "Label" column, because only
@@ -60,7 +60,7 @@ namespace myApp
             var prediction = model.CreatePredictionEngine<TransactionData, TransactionPrediction>(mlContext).Predict(
                 new TransactionData()
                 {
-                    Amount = -3.3f,
+                    Amount = -40.0f,
                 });
 
             Console.WriteLine($"Predicted transaction type is: {prediction.PredictedLabels}");
