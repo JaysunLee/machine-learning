@@ -16,26 +16,17 @@ namespace myApp
         // input for prediction operations
         // - First 4 properties are inputs/features used to predict the label
         // - Label is what you are predicting, and is only set when training
-        public class IrisData
+        public class TransactionData
         {
-            [LoadColumn(0)]
-            public float SepalLength;
-
             [LoadColumn(1)]
-            public float SepalWidth;
-
-            [LoadColumn(2)]
-            public float PetalLength;
-
-            [LoadColumn(3)]
-            public float PetalWidth;
+            public float Amount;
 
             [LoadColumn(4)]
             public string Label;
         }
 
         // IrisPrediction is the result returned from prediction operations
-        public class IrisPrediction
+        public class TransactionPrediction
         {
             [ColumnName("PredictedLabel")]
             public string PredictedLabels;
@@ -48,7 +39,7 @@ namespace myApp
 
             // If working in Visual Studio, make sure the 'Copy to Output Directory'
             // property of iris-data.txt is set to 'Copy always'
-            IDataView trainingDataView = mlContext.Data.LoadFromTextFile<IrisData>(path: "iris-data.txt", hasHeader: false, separatorChar: ',');
+            IDataView trainingDataView = mlContext.Data.LoadFromTextFile<TransactionData>(path: "TransactionHistory.csv", hasHeader: false, separatorChar: ',');
 
             // STEP 3: Transform your data and add a learner
             // Assign numeric values to text in the "Label" column, because only
@@ -56,7 +47,7 @@ namespace myApp
             // Add a learning algorithm to the pipeline. e.g.(What type of iris is this?)
             // Convert the Label back into original text (after converting to number in step 3)
             var pipeline = mlContext.Transforms.Conversion.MapValueToKey("Label")
-                .Append(mlContext.Transforms.Concatenate("Features", "SepalLength", "SepalWidth", "PetalLength", "PetalWidth"))
+                .Append(mlContext.Transforms.Concatenate("Features", "Amount"))
                 .AppendCacheCheckpoint(mlContext)
                 .Append(mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent(labelColumnName: "Label", featureColumnName: "Features"))
                 .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
@@ -66,16 +57,13 @@ namespace myApp
 
             // STEP 5: Use your model to make a prediction
             // You can change these numbers to test different predictions
-            var prediction = model.CreatePredictionEngine<IrisData, IrisPrediction>(mlContext).Predict(
-                new IrisData()
+            var prediction = model.CreatePredictionEngine<TransactionData, TransactionPrediction>(mlContext).Predict(
+                new TransactionData()
                 {
-                    SepalLength = 3.3f,
-                    SepalWidth = 1.6f,
-                    PetalLength = 0.2f,
-                    PetalWidth = 5.1f,
+                    Amount = -3.3f,
                 });
 
-            Console.WriteLine($"Predicted flower type is: {prediction.PredictedLabels}");
+            Console.WriteLine($"Predicted transaction type is: {prediction.PredictedLabels}");
 
             Console.WriteLine("Press any key to exit....");
             Console.ReadLine();
